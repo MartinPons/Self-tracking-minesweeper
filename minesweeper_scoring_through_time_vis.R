@@ -1,31 +1,37 @@
+# This script creates a visualization of a self-tracking performance in the game minesweeper using
+# The minesweeper clone, "Arbiter", which registers all kinds of useful statistics of all completed 
+# games. You can download arbiter through this link. https://minesweepergame.com/download/arbiter.php
+# it requires no installation
+
+# The visualization includes a font family themed in the shape of the minesweeper numbers and is not
+# a default font in Windows. You can download it here
+# https://fontstruct.com/fontstructions/show/1501665/mine-sweeper
 
 
 
+
+
+# SET ---------------------------------------------------------------------
+
+# load libreries
 library(tidyverse)
 library(lubridate)
 library(Cairo)
 library(ggthemes)
-library(png)
-library(cowplot)
-
-
 library(extrafont)
 
-# SET ---------------------------------------------------------------------
 
+# viz. constants
+minesweeper_font <- "MINE-SWEEPER"
 
+title_color <- "#707ca4"
+subtitle_color <- "#8f99b7"
+bbbv_text_color <- "#abb3c9"
+axis_line_color <- "#3c445d"
 
-
-
-minesweeper_font = "MINE-SWEEPER"
-
-title_font <- "#707ca4"
-subtitle_font <- "#8f99b7"
-axis_font <- "#707ca4"
-bbbv_font <- "#abb3c9"
-
-bbbv_text <- 
+bbbv_text_family <- "Segoe UI Light"
   
+bbbv_text <- 
   "Boards of identical size can present varying levels 
 of difficulty in Minesweeper. The Bechtel's Board 
 Benchmark Value (3BV) seeks to estimate this 
@@ -33,25 +39,25 @@ difficulty by counting the minimum number of
 left-clicks required on the mouse to clean the board"
 
 
-smiley <- readPNG("minesweeper_smiley.png")
 
-dat <- read_csv(here::here("raw_data", "stats_csv.csv")) |> 
-  unite("timestamp", Day:Sec, sep = "_", remove = F) |> 
-  mutate(timestamp = dmy_hms(timestamp),
-         idx = row_number(), 
-         time_since_last = as.numeric(timestamp - lag(timestamp)))
+# DATA WRANGLING ----------------------------------------------------------
 
-int <- dat |> filter(mode == "INT")
 
-int <- int |> 
-  mutate(date = as.Date(timestamp))
+int <- read_csv(here::here("raw_data", "stats_csv.csv")) |> # load
+  filter(mode == "INT") |> # getting intermediate boards
+  
+      # format date
+      unite("date", Day:Year, sep = "_", remove = F) |> 
+      mutate(date = dmy(date))
 
 
 
 
+# VISUALIZATION -----------------------------------------------------------
 
 
-CairoWin()
+
+CairoWin() # Adjust height and width arguments to get a better fit
 int |> 
   ggplot(aes(date, Time)) + 
   geom_point(aes(y = Time, color = BBBV), shape = "-",   size = 10,  alpha = 1) + 
@@ -87,9 +93,9 @@ int |>
                 label = bbbv_text),
             hjust = "left",
             vjust = "top", 
-            color = bbbv_font, 
+            color = bbbv_text_color, 
             lineheight = 1.5, 
-            family = "Segoe UI Light", 
+            family = bbbv_text_family, 
             size = 4.6) +
   
   scale_color_continuous(type = "viridis")  + 
@@ -98,13 +104,10 @@ int |>
     plot.background = element_rect(fill = "black"),
     legend.position = c(0.85, 0.93),
     legend.text = element_text(color = "white"),
-    plot.title = element_text(family = "MINE-SWEEPER", color = title_font, size = 15, hjust = 0.132), 
-    plot.subtitle = element_text(family = "Tahoma", color = subtitle_font, size = 18, hjust = 0),
-    plot.caption = element_text(family = "Tahoma", color = bbbv_font, size = 14),
+    plot.title = element_text(family = "MINE-SWEEPER", color = title_color, size = 15, hjust = 0.132), 
+    plot.subtitle = element_text(family = "Tahoma", color = subtitle_color, size = 18, hjust = 0),
+    plot.caption = element_text(family = "Tahoma", color = bbbv_text_color, size = 14),
     axis.text = element_text(family = "MINE-SWEEPER", color = axis_font), 
-    axis.title.y = element_text(color = subtitle_font, family = "Tahoma", size = 17),
-    axis.line = element_line(color = "white")) 
+    axis.title.y = element_text(color = subtitle_color, family = "Tahoma", size = 17),
+    axis.line = element_line(color = axis_line_color)) 
 
-
-
-# ggdraw() + draw_plot(minesweeper_plot) +  draw_image(smiley, width = 0.9, height = 0.05, scale = 0.5)
