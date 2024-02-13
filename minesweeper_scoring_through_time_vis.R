@@ -56,13 +56,11 @@ int <- read_csv(here::here("raw_data", "stats_csv.csv")) |> # load
 # VISUALIZATION -----------------------------------------------------------
 
 
-
-CairoWin() # Adjust height and width arguments to get a better fit
 int |> 
   ggplot(aes(date, Time)) + 
   geom_point(aes(y = Time, color = BBBV), shape = "-",   size = 10,  alpha = 1) + 
-  geom_line(stat = "smooth", color = "steelblue", size = 0.8) + 
-  geom_line(stat = "summary", size = 0.9, color = "white") +
+  geom_line(stat = "smooth", color = "steelblue", size = 1) + 
+  geom_line(stat = "summary", size = 1.1, color = "#bec4d5") +
   
   theme_tufte() + 
   
@@ -83,12 +81,11 @@ int |>
                                label.theme = element_text(color = "white", 
                                                           family = minesweeper_font, 
                                                           size = 7),
-                               barwidth = 14.8),
+                               barwidth = 16),
          fill = guide_colourbar(direction = "horizontal")) +
   
   
-  geom_text(aes(x = ymd(20240127),
-                # xend = ymd(20240206),
+  geom_text(aes(x = ymd(20240126),
                 y = 100, 
                 label = bbbv_text),
             hjust = "left",
@@ -96,18 +93,26 @@ int |>
             color = bbbv_text_color, 
             lineheight = 1.5, 
             family = bbbv_text_family, 
-            size = 4.6) +
+            size = 4) +
   
   scale_color_continuous(type = "viridis")  + 
   
-  theme(#panel.background = element_rect(fill = "black"), 
+  theme(
     plot.background = element_rect(fill = "black"),
-    legend.position = c(0.85, 0.93),
+    legend.position = c(0.837, 0.93),
     legend.text = element_text(color = "white"),
-    plot.title = element_text(family = "MINE-SWEEPER", color = title_color, size = 15, hjust = 0.132), 
-    plot.subtitle = element_text(family = "Tahoma", color = subtitle_color, size = 18, hjust = 0),
-    plot.caption = element_text(family = "Tahoma", color = bbbv_text_color, size = 14),
+    plot.title = element_text(family = "MINE-SWEEPER", color = title_color, size = 12.7, hjust = 0.06), 
+    plot.subtitle = element_text(family = "Tahoma", color = subtitle_color, size = 14, hjust = 0),
+    plot.caption = element_text(family = "Tahoma", color = bbbv_text_color, size = 12),
     axis.text = element_text(family = "MINE-SWEEPER", color = axis_font), 
     axis.title.y = element_text(color = subtitle_color, family = "Tahoma", size = 17),
     axis.line = element_line(color = axis_line_color)) 
 
+
+ggsave(here::here("visualizations", "selftracking_time.png"),
+       device = png, 
+       type = "cairo",
+       dpi = 300, 
+       width = 36, 
+       height = 20, 
+       units = "cm")
